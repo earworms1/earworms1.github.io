@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <script src="https://cdn.bootcdn.net/ajax/libs/vue/2.6.13/vue.js"></script>
+
+  <script src="./js/3.js"></script>
+  <script src="./js/2.js"></script>
+  <script src="./js/1.js"></script>
+  <meta charset="UTF-8">
+</head>
+<title>Random Song Player with Click Counter</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    margin: 50px;
+    background-color: #f5f5f5;
+  }
+
+  h1 {
+    color: #333;
+  }
+
+  button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  button:hover {
+    background-color: #0056b3;
+  }
+
+
+  /* .act:active {
+      background-color: black;
+    } */
+
+  #waveform {
+    height: 200px;
+    width: 800;
+    background-color: #eee;
+    margin: 20px auto;
+    overflow: scroll;
+  }
+
+  #progressBar {
+    width: 300px;
+    height: 10px;
+    background-color: #eee;
+    margin: 20px auto;
+    overflow: hidden;
+  }
+
+  #progress {
+    height: 100%;
+    background-color: #007bff;
+    width: 0;
+    transition: width 0.3s ease;
+  }
+
+  #counter {
+    font-size: 24px;
+    margin-top: 20px;
+    color: #777;
+  }
+
+  .card {
+    width: 60vw;
+    background-color: #cccfd0;
+    margin: 0 auto;
+    text-align: left;
+    border: 1px solid;
+    padding: 20px;
+    border-radius: 20px;
+    margin-top: 80px;
+
+  }
+
+  input {
+    margin-bottom: 30px;
+  }
+
+  .active {
+    background-color: red;
+    /* 设置选中按钮的背景色 */
+  }
+</style>
+</head>
+
+<body>
+  <div id="app">
+    <my-component :song-chosen="songChosen"></my-component>
+    <button style="width: 100px;height: 50px;font-size: 16px;" v-show="count == 0" @click="clickfn()">start</button>
+    <div v-show="count == 1">
+      <h1>Now you gonna listen to a music piece. After linstening, can you describe the feeling about it?</h1>
+
+      <audio id="audioPlayer" controls></audio>
+
+
+      <div id="progressBar">
+        <div id="progress"></div>
+      </div>
+
+      <!-- <p id="counter">Clicks: 0</p> -->
+      <div style="display: flex;flex-direction: column;width: 100vw;align-items: center;justify-content: center;">
+        <button onclick="toggleSong()" style="width: 150px;height: 50px;font-size: 16px;margin-bottom: 10px;">Play
+          Random Song</button>
+        <button style="width: 150px;height: 50px;font-size: 16px;position: absolute;bottom: 10px;right: 10px;"
+          v-show="count == 1" @click="clickfn()">next</button>
+      </div>
+
+
+
+    </div>
+    <div v-show="count == 2">
+
+      <h1>please answer the following questions related to your music experience:</h1>
+
+
+
+      <button style="width: 100px;height: 50px;font-size: 16px;position: absolute;bottom: 10px;right: 10px;"
+        v-show="count == 2" @click="clickfn()">next</button>
+      <div class="card">
+        <div class="question">
+          Q1 What is your country?
+        </div>
+        <input type="textare" style="margin-top: 20px;">
+
+
+
+        <div class="question">
+          Q2 what is your gender?
+        </div>
+        <form style="display: flex;margin-top: 20px;
+        
+        ">
+          <input type="radio" name="group" value="Male"> Male<br>
+          <input type="radio" name="group" value="Female"> Female
+          <br>
+
+        </form>
+
+
+
+
+        <div class="question">
+          Q3 what is your age?
+        </div>
+        <input type="textare" style="margin-top: 20px;">
+
+
+        
+        <div class="question">
+          Q4 If you had, what movement do you have? 
+
+        </div>
+        <input type="textare" style="margin-top: 20px;">
+
+
+
+
+        <div class="question">
+          Q5 Have heard more repeating music piece?
+
+        </div>
+        <form style="display: flex;margin-top: 20px;
+        
+        ">
+          <input type="radio" name="group" value="yes"> Yes <br>
+          <input type="radio" name="group" value="No"> No<br>
+
+        </form>
+
+        <div class="question">
+          Q6 How does this song make you feel? 
+
+        </div>
+        <form style="display: flex;margin-top: 20px;
+        
+        ">
+          <input type="radio" name="group" value=" excited"> Excited <br>
+          <input type="radio" name="group" value="peaceful"> Peaceful<br>
+          <input type="radio" name="group" value="upset"> Upset<br>
+          <input type="radio" name="group" value="inspired"> Inspired<br> 
+
+        </form>
+
+
+        <div class="question">
+          Q7 Did you experience any movements during the listening to this music?
+
+        </div>
+        <form style="display: flex;margin-top: 20px;
+        
+        ">
+          <input type="radio" name="group" value="Nod Head">Nod Head <br>
+          <input type="radio" name="group" value="Humming"> Humming<br>
+          <input type="radio" name="group" value="Tapping Desk">Tapping Desk<br>
+          <input type="radio" name="group" value="None"> None<br>
+
+        </form>
+      </div>
+
+
+
+
+    </div>
+
+
+    <div v-show="count == 3">
+      <div>
+        <button id="playButton">start play</button>
+        <span id="currentTime"></span>
+      </div>
+
+
+      <div id="waveform"></div>
+
+
+
+      <button @click="startTimer">click</button>
+      <button style="width: 100px;height: 50px;font-size: 16px;position: absolute;bottom: 10px;right: 10px;"
+        v-show="count == 3" @click="clickfn()">next</button>
+
+    </div>
+
+    <div v-show="count == 4">
+      <h1>please answer the following questions related to your music experience:</h1>
+
+
+
+      <button style="width: 100px;height: 50px;font-size: 16px;position: absolute;bottom: 10px;right: 10px;"
+        v-show="count == 4" @click="clickfn()">next</button>
+      <div class="card">
+        <div class="question">
+          Q1 What is your country?
+        </div>
+        <input type="textare" style="margin-top: 20px;">
+
+
+
+        <div class="question">
+          Q2 what is your gender?
+        </div>
+        <form style="display: flex;margin-top: 20px;
+        
+        ">
+          <input type="radio" name="group" value="Male"> Male<br>
+          <input type="radio" name="group" value="Female"> Female
+          <br>
+
+        </form>
+
+
+
+
+        <div class="question">
+          Q3 what is your age?
+        </div>
+        <input type="textare" style="margin-top: 20px;">
+
+
+        
+        <div class="question">
+          Q4 If you had, what movement do you have? 
+
+        </div>
+        <input type="textare" style="margin-top: 20px;">
+
+
+
+
+        <div class="question">
+          Q5 Have heard more repeating music piece?
+
+        </div>
+        <form style="display: flex;margin-top: 20px;
+        
+        ">
+          <input type="radio" name="group" value="Yes"> Yes <br>
+          <input type="radio" name="group" value="No"> No<br>
+
+        </form>
+
+        <div class="question">
+          Q6 How does this song make you feel? 
+
+        </div>
+        <form style="display: flex;margin-top: 20px;
+        
+        ">
+          <input type="radio" name="group" value=" excited"> Excited <br>
+          <input type="radio" name="group" value="peaceful"> Peaceful<br>
+          <input type="radio" name="group" value="upset"> Upset<br>
+          <input type="radio" name="group" value="inspired"> Inspired<br> 
+
+        </form>
+
+
+        <div class="question">
+          Q7 Did you experience any movements during the listening to this music?
+
+        </div>
+        <form style="display: flex;margin-top: 20px;
+        
+        ">
+          <input type="radio" name="group" value="Nod Head">Nod Head <br>
+          <input type="radio" name="group" value="Humming"> Humming<br>
+          <input type="radio" name="group" value="Tapping Desk">Tapping Desk<br>
+          <input type="radio" name="group" value="None"> None<br>
+
+        </form>
+      </div>
+
+
+
+    </div>
+
+
+  </div>
+
+  <script>
+    new Vue({
+      el: '#app',
+      components: {
+        'my-component': {
+          props: ['songChosen'],
+          render(h) {
+            return;
+          },
+          created() {
+            console.log("trans" + this.songChosen);
+          }
+        }
+      },
+      data: {
+        message: '欢迎使用Vue.js!',
+        selectedIndex: null,
+        count: 0,
+        timer: null,
+        hours: 0,
+        minutes: 0,
+        seconds: 0,
+        index: 1,
+        list: [],
+        lists: [
+          'excited', 'peaceful', 'upset', 'inspired'
+        ],
+        songChosen: null,
+        wavesurfer: null,
+      },
+      updated() {
+        if (this.count != 3) {
+          return;
+        }
+        var markerList = [
+
+          [
+            {
+              time: 10,
+              label: "V1",
+              color: '#ff990a',
+              draggable: true
+            },
+            {
+              time: 20,
+              label: "V2",
+              color: '#ff990a',
+              preventContextMenu: true
+            },
+            {
+              time: 30,
+              label: "V3",
+              color: '#ff990a',
+              preventContextMenu: true
+            },
+            {
+              time: 40,
+              label: "V4",
+              color: '#ff990a',
+              preventContextMenu: true
+            },
+            {
+              time: 50,
+              label: "V5",
+              color: '#ff990a',
+              preventContextMenu: true
+            },
+            {
+              time: 60,
+              label: "V6",
+              color: '#ff990a',
+              preventContextMenu: true
+            },
+            {
+              time: 70,
+              label: "V7",
+              color: '#ff990a',
+              preventContextMenu: true
+            }
+          ],
+          [
+            {
+              time: 10,
+              label: "V1",
+              color: '#ff990a',
+              draggable: true
+            },
+            {
+              time: 20,
+              label: "V2",
+              color: '#ff990a',
+              preventContextMenu: true
+            },
+            {
+              time: 30,
+              label: "V3",
+              color: '#ff990a',
+              preventContextMenu: true
+            },
+            {
+              time: 40,
+              label: "V4",
+              color: '#ff990a',
+              preventContextMenu: true
+            },
+            {
+              time: 50,
+              label: "V5",
+              color: '#ff990a',
+              preventContextMenu: true
+            },
+            {
+              time: 60,
+              label: "V6",
+              color: '#ff990a',
+              preventContextMenu: true
+            },
+            {
+              time: 70,
+              label: "V7",
+              color: '#ff990a',
+              preventContextMenu: true
+            }
+          ],
+          [
+            {
+              time: 10,
+              label: "V1",
+              color: '#ff990a',
+              draggable: true
+            },
+            {
+              time: 20,
+              label: "V2",
+              color: '#ff990a',
+              preventContextMenu: true
+            },
+            {
+              time: 30,
+              label: "V3",
+              color: '#ff990a',
+              preventContextMenu: true
+            },
+            {
+              time: 40,
+              label: "V4",
+              color: '#ff990a',
+              preventContextMenu: true
+            },
+            {
+              time: 50,
+              label: "V5",
+              color: '#ff990a',
+              preventContextMenu: true
+            },
+            {
+              time: 60,
+              label: "V6",
+              color: '#ff990a',
+              preventContextMenu: true
+            },
+            {
+              time: 70,
+              label: "V7",
+              color: '#ff990a',
+              preventContextMenu: true
+            }
+          ],
+          [
+            {
+              time: 10,
+              label: "V1",
+              color: '#ff990a',
+              draggable: true
+            },
+            {
+              time: 20,
+              label: "V2",
+              color: '#ff990a',
+              preventContextMenu: true
+            },
+            {
+              time: 30,
+              label: "V3",
+              color: '#ff990a',
+              preventContextMenu: true
+            },
+            {
+              time: 40,
+              label: "V4",
+              color: '#ff990a',
+              preventContextMenu: true
+            },
+            {
+              time: 50,
+              label: "V5",
+              color: '#ff990a',
+              preventContextMenu: true
+            },
+            {
+              time: 60,
+              label: "V6",
+              color: '#ff990a',
+              preventContextMenu: true
+            },
+            {
+              time: 70,
+              label: "V7",
+              color: '#ff990a',
+              preventContextMenu: true
+            }
+          ],
+          [
+            {
+              time: 10,
+              label: "V1",
+              color: '#ff990a',
+              draggable: true
+            },
+            {
+              time: 20,
+              label: "V2",
+              color: '#ff990a',
+              preventContextMenu: true
+            },
+            {
+              time: 30,
+              label: "V3",
+              color: '#ff990a',
+              preventContextMenu: true
+            },
+            {
+              time: 40,
+              label: "V4",
+              color: '#ff990a',
+              preventContextMenu: true
+            },
+            {
+              time: 50,
+              label: "V5",
+              color: '#ff990a',
+              preventContextMenu: true
+            },
+            {
+              time: 60,
+              label: "V6",
+              color: '#ff990a',
+              preventContextMenu: true
+            },
+            {
+              time: 70,
+              label: "V7",
+              color: '#ff990a',
+              preventContextMenu: true
+            }
+          ],
+          [
+            {
+              time: 10,
+              label: "V1",
+              color: '#ff990a',
+              draggable: true
+            },
+            {
+              time: 20,
+              label: "V2",
+              color: '#ff990a',
+              preventContextMenu: true
+            },
+            {
+              time: 30,
+              label: "V3",
+              color: '#ff990a',
+              preventContextMenu: true
+            },
+            {
+              time: 40,
+              label: "V4",
+              color: '#ff990a',
+              preventContextMenu: true
+            },
+            {
+              time: 50,
+              label: "V5",
+              color: '#ff990a',
+              preventContextMenu: true
+            },
+            {
+              time: 60,
+              label: "V6",
+              color: '#ff990a',
+              preventContextMenu: true
+            },
+            {
+              time: 70,
+              label: "V7",
+              color: '#ff990a',
+              preventContextMenu: true
+            }
+          ],
+          [
+            {
+              time: 10,
+              label: "V1",
+              color: '#ff990a',
+              draggable: true
+            },
+            {
+              time: 20,
+              label: "V2",
+              color: '#ff990a',
+              preventContextMenu: true
+            },
+            {
+              time: 30,
+              label: "V3",
+              color: '#ff990a',
+              preventContextMenu: true
+            },
+            {
+              time: 40,
+              label: "V4",
+              color: '#ff990a',
+              preventContextMenu: true
+            },
+            {
+              time: 50,
+              label: "V5",
+              color: '#ff990a',
+              preventContextMenu: true
+            },
+            {
+              time: 60,
+              label: "V6",
+              color: '#ff990a',
+              preventContextMenu: true
+            },
+            {
+              time: 70,
+              label: "V7",
+              color: '#ff990a',
+              preventContextMenu: true
+            }
+          ],
+
+
+        ];
+        var songs = [
+          "./audio/3.m4a",
+          "./audio/2.mp3"
+        ];
+        this.markers = markerList[(Math.floor(Math.random())) + window.songChosen * 2];
+        this.wavesurfer = WaveSurfer.create({
+          container: document.querySelector('#waveform'),
+          waveColor: 'black',
+          progressColor: 'purple',
+          cursorWidth: 1,
+          cursorColor: '#ff0000',
+          barWidth: 2,
+          plugins: [
+            WaveSurfer.markers.create({
+              markers: this.markers
+            }
+            ) // 添加标记插件
+          ]
+        });
+
+        // 加载音频文件
+        this.wavesurfer.load(songs[window.songChosen]);
+
+        // 更新当前播放位置
+        const updateCurrentTime = () => {
+          const currentTime = this.wavesurfer.getCurrentTime();
+          document.getElementById('currentTime').innerHTML = currentTime.toFixed(2) + 's';
+
+          // 在波形图上显示当前播放位置的竖线
+          this.wavesurfer.drawer.progress(this.wavesurfer.backend.getPlayedPercents());
+
+          requestAnimationFrame(updateCurrentTime);
+        };
+        // 添加事件监听器
+        this.wavesurfer.on('ready', () => {
+          // 当音频文件加载完成后，执行一些操作
+          console.log('音频文件已加载');
+          updateCurrentTime();
+        });
+        this.wavesurfer.on("ready", () => {
+          this.markers.forEach(marker => {
+            this.wavesurfer.addMarker(marker);
+          });
+        });
+
+        // 控制播放/暂停
+        document.getElementById('playButton').addEventListener('click', () => {
+          this.wavesurfer.playPause();
+        });
+      },
+      methods: {
+        selectButton(index) {
+          this.selectedIndex = index;
+          this.count++
+        },
+        updateMessage: function () {
+          this.message = '你好，' + this.name + '!';
+        },
+        clickfn() {
+          this.count++
+
+          if (this.count === 3) {
+            console.log("324")
+            this.timer = setInterval(() => {
+              this.seconds++;
+              if (this.seconds === 60) {
+                this.seconds = 0;
+                this.minutes++;
+              }
+              if (this.minutes === 60) {
+                this.minutes = 0;
+                this.hours++;
+              }
+
+            }, 1000);
+          }
+        },
+        startTimer() {
+
+          // 输出时间
+          console.log(`第${this.index}次${this.hours}时:${this.minutes}分:秒${this.seconds}`);
+
+          let temp = (`第${this.index}次${this.hours}时:${this.minutes}分:秒${this.seconds}`)
+
+          this.index++
+          this.list.push(temp)
+          console.log(this.list)
+
+        },
+        stopTimer() {
+          clearInterval(this.timer);
+        },
+
+        handleTimeUpdate() {
+          const currentTime = audioPlayer.currentTime;
+
+          this.arrowTimes.forEach((time) => {
+            if (currentTime >= time) {
+              this.arrowTime = time;
+              this.drawArrow();
+            }
+          });
+        },
+      }
+    });
+  </script>
+  <script>
+    var audioPlayer = document.getElementById('audioPlayer');
+    var progressBar = document.getElementById('progress');
+
+    var songs = [
+      "./audio/3.m4a",
+      "./audio/2.mp3"
+    ];
+    var clickCount = 0;
+    var counterElement = document.getElementById('counter');
+    window.songChosen = 0;
+    window.markers = [];
+    function toggleSong() {
+      if (!audioPlayer.paused) {
+        audioPlayer.pause();
+        audioPlayer.currentTime = 0;
+        resetProgressBar();
+      } else {
+        var randomIndex = Math.floor(Math.random() * songs.length);
+        var songUrl = songs[randomIndex];
+        window.songChosen = randomIndex;
+        audioPlayer.src = songUrl;
+        audioPlayer.play();
+        updateProgressBar();
+      }
+    }
+
+    function updateProgressBar() {
+      var duration = audioPlayer.duration;
+      var currentTime = audioPlayer.currentTime;
+      var progress = (currentTime / duration) * 100;
+      progressBar.style.width = progress + '%';
+    }
+
+    function resetProgressBar() {
+      progressBar.style.width = 0;
+    }
+
+    audioPlayer.addEventListener('timeupdate', updateProgressBar);
+
+    Vue.component('my-component', {
+      props: ['songChosen'],
+
+      created() {
+        console.log(this.songChosen);
+      }
+    });
+    let count = 0;
+
+
+  </script>
+
+</body>
+
+</html>
