@@ -4,11 +4,11 @@
 <head>
   <script src="https://cdn.bootcdn.net/ajax/libs/vue/2.6.13/vue.js"></script>
 
-  
   <script src="./js/3.js"></script>
   <script src="./js/2.js"></script>
   <script src="./js/1.js"></script>
   <meta charset="UTF-8">
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 </head>
 <title>Random Song Player with Click Counter</title>
 <style>
@@ -41,15 +41,14 @@
   /* .act:active {
       background-color: black;
     } */
-
-  #waveform {
+  
+  #waveform{
     height: 200px;
     width: 800;
     background-color: #eee;
     margin: 20px auto;
     overflow: scroll;
   }
-
   #progressBar {
     width: 300px;
     height: 10px;
@@ -86,11 +85,10 @@
   input {
     margin-bottom: 30px;
   }
-
   .active {
-    background-color: red;
-    /* 设置选中按钮的背景色 */
+    background-color: red; /* 设置选中按钮的背景色 */
   }
+  
 </style>
 </head>
 
@@ -108,12 +106,14 @@
         <div id="progress"></div>
       </div>
 
-      <!-- <p id="counter">Clicks: 0</p> -->
+      <div id="app">
+        <!-- <p id="counter">Clicks: 0</p> -->
       <div style="display: flex;flex-direction: column;width: 100vw;align-items: center;justify-content: center;">
-        <button onclick="toggleSong()" style="width: 150px;height: 50px;font-size: 16px;margin-bottom: 10px;">Play
+        <button v-if="tog" onclick="toggleSong()" style="width: 150px;height: 50px;font-size: 16px;margin-bottom: 10px;" id="randomPlay">Play
           Random Song</button>
         <button style="width: 150px;height: 50px;font-size: 16px;position: absolute;bottom: 10px;right: 10px;"
-          v-show="count == 1" @click="clickfn()">next</button>
+          v-show="randomA" @click="clickfn()">next</button>
+      </div>
       </div>
 
 
@@ -121,113 +121,29 @@
     </div>
     <div v-show="count == 2">
 
-      <h1>please answer the following questions related to your music experience:</h1>
+      <h1>How do you feel about this music? </h1>
+      <button  @click="selectButton(index)" style="width: 100px;height: 50px;font-size: 16px;margin: 0 5px"  class="act" v-for = "(item,index) in lists"  :class="{ active: selectedIndex === index }" >{{item}}</button>
 
 
-
-      <button style="width: 100px;height: 50px;font-size: 16px;position: absolute;bottom: 10px;right: 10px;"
-        v-show="count == 2" @click="clickfn()">next</button>
-      <div class="card">
-        <div class="question">
-          Q1 What is your country?
-        </div>
-        <input type="textare" style="margin-top: 20px;">
-
-
-
-        <div class="question">
-          Q2 what is your gender?
-        </div>
-        <form style="display: flex;margin-top: 20px;
-        
-        ">
-          <input type="radio" name="group" value="Male"> Male<br>
-          <input type="radio" name="group" value="Female"> Female
-          <br>
-
-        </form>
-
-
-
-
-        <div class="question">
-          Q3 what is your age?
-        </div>
-        <input type="textare" style="margin-top: 20px;">
-
-
-        
-        <div class="question">
-          Q4 If you had, what movement do you have? 
-
-        </div>
-        <input type="textare" style="margin-top: 20px;">
-
-
-
-
-        <div class="question">
-          Q5 Have heard more repeating music piece?
-
-        </div>
-        <form style="display: flex;margin-top: 20px;
-        
-        ">
-          <input type="radio" name="group" value="yes"> Yes <br>
-          <input type="radio" name="group" value="No"> No<br>
-
-        </form>
-
-        <div class="question">
-          Q6 How does this song make you feel? 
-
-        </div>
-        <form style="display: flex;margin-top: 20px;
-        
-        ">
-          <input type="radio" name="group" value=" excited"> Excited <br>
-          <input type="radio" name="group" value="peaceful"> Peaceful<br>
-          <input type="radio" name="group" value="upset"> Upset<br>
-          <input type="radio" name="group" value="inspired"> Inspired<br> 
-
-        </form>
-
-
-        <div class="question">
-          Q7 Did you experience any movements during the listening to this music?
-
-        </div>
-        <form style="display: flex;margin-top: 20px;
-        
-        ">
-          <input type="radio" name="group" value="Nod Head">Nod Head <br>
-          <input type="radio" name="group" value="Humming"> Humming<br>
-          <input type="radio" name="group" value="Tapping Desk">Tapping Desk<br>
-          <input type="radio" name="group" value="None"> None<br>
-
-        </form>
-      </div>
-
-
-
+      
 
     </div>
 
 
     <div v-show="count == 3">
-      <div>
-        <button id="playButton">start play</button>
+      <div style="padding-right: 8vw ;">
+        <button id="playButton" v-show = "play">start play</button>
         <span id="currentTime"></span>
       </div>
-
+   
 
       <div id="waveform"></div>
+      
 
-
-
-      <button @click="startTimer">click</button>
+      
+   <button @click="startTimer">click</button>
       <button style="width: 100px;height: 50px;font-size: 16px;position: absolute;bottom: 10px;right: 10px;"
-        v-show="count == 3" @click="clickfn()">next</button>
+        v-show="videoNext" @click="clickfns()">next</button>
 
     </div>
 
@@ -240,37 +156,7 @@
         v-show="count == 4" @click="clickfn()">next</button>
       <div class="card">
         <div class="question">
-          Q1 What is your country?
-        </div>
-        <input type="textare" style="margin-top: 20px;">
-
-
-
-        <div class="question">
-          Q2 what is your gender?
-        </div>
-        <form style="display: flex;margin-top: 20px;
-        
-        ">
-          <input type="radio" name="group" value="Male"> Male<br>
-          <input type="radio" name="group" value="Female"> Female
-          <br>
-
-        </form>
-
-
-
-
-        <div class="question">
-          Q3 what is your age?
-        </div>
-        <input type="textare" style="margin-top: 20px;">
-
-
-        
-        <div class="question">
-          Q4 If you had, what movement do you have? 
-
+          Q1 Where are your from ?
         </div>
         <input type="textare" style="margin-top: 20px;">
 
@@ -278,43 +164,38 @@
 
 
         <div class="question">
-          Q5 Have heard more repeating music piece?
+          Q2 how old are you?
+        </div>
+        <input type="textare" style="margin-top: 20px;">
 
+
+
+
+        <div class="question">
+          Q3 during listen to the music, have you have any other movement except cliking?
         </div>
         <form style="display: flex;margin-top: 20px;
         
         ">
-          <input type="radio" name="group" value="Yes"> Yes <br>
-          <input type="radio" name="group" value="No"> No<br>
+          <input type="radio" name="group" value="yes"> Yes<br>
+          <input type="radio" name="group" value="no"> no<br>
 
         </form>
 
         <div class="question">
-          Q6 How does this song make you feel? 
-
+          Q4 if you had, what is that?
         </div>
-        <form style="display: flex;margin-top: 20px;
-        
-        ">
-          <input type="radio" name="group" value=" excited"> Excited <br>
-          <input type="radio" name="group" value="peaceful"> Peaceful<br>
-          <input type="radio" name="group" value="upset"> Upset<br>
-          <input type="radio" name="group" value="inspired"> Inspired<br> 
-
-        </form>
+        <input type="textare" style="margin-top: 20px;">
 
 
         <div class="question">
-          Q7 Did you experience any movements during the listening to this music?
-
+          Q5 have heard more repeating music piece ?
         </div>
         <form style="display: flex;margin-top: 20px;
-        
+       
         ">
-          <input type="radio" name="group" value="Nod Head">Nod Head <br>
-          <input type="radio" name="group" value="Humming"> Humming<br>
-          <input type="radio" name="group" value="Tapping Desk">Tapping Desk<br>
-          <input type="radio" name="group" value="None"> None<br>
+          <input type="radio" name="group" value="yes"> Yes<br>
+          <input type="radio" name="group" value="no"> no<br>
 
         </form>
       </div>
@@ -341,6 +222,10 @@
         }
       },
       data: {
+        tog:true,
+        randomA:false,
+        play:true,
+        videoNext:false,
         message: '欢迎使用Vue.js!',
         selectedIndex: null,
         count: 0,
@@ -348,12 +233,12 @@
         hours: 0,
         minutes: 0,
         seconds: 0,
-        index: 1,
-        list: [],
-        lists: [
-          'excited', 'peaceful', 'upset', 'inspired'
+        index:1,
+        list:[],
+        lists:[
+                'excited','peaceful','upset','inspired'
         ],
-        songChosen: null,
+        songChosen: null, 
         wavesurfer: null,
       },
       updated() {
@@ -361,323 +246,323 @@
           return;
         }
         var markerList = [
-
-          [
-            {
-              time: 10,
-              label: "V1",
-              color: '#ff990a',
-              draggable: true
-            },
-            {
-              time: 20,
-              label: "V2",
-              color: '#ff990a',
-              preventContextMenu: true
-            },
-            {
-              time: 30,
-              label: "V3",
-              color: '#ff990a',
-              preventContextMenu: true
-            },
-            {
-              time: 40,
-              label: "V4",
-              color: '#ff990a',
-              preventContextMenu: true
-            },
-            {
-              time: 50,
-              label: "V5",
-              color: '#ff990a',
-              preventContextMenu: true
-            },
-            {
-              time: 60,
-              label: "V6",
-              color: '#ff990a',
-              preventContextMenu: true
-            },
-            {
-              time: 70,
-              label: "V7",
-              color: '#ff990a',
-              preventContextMenu: true
-            }
-          ],
-          [
-            {
-              time: 10,
-              label: "V1",
-              color: '#ff990a',
-              draggable: true
-            },
-            {
-              time: 20,
-              label: "V2",
-              color: '#ff990a',
-              preventContextMenu: true
-            },
-            {
-              time: 30,
-              label: "V3",
-              color: '#ff990a',
-              preventContextMenu: true
-            },
-            {
-              time: 40,
-              label: "V4",
-              color: '#ff990a',
-              preventContextMenu: true
-            },
-            {
-              time: 50,
-              label: "V5",
-              color: '#ff990a',
-              preventContextMenu: true
-            },
-            {
-              time: 60,
-              label: "V6",
-              color: '#ff990a',
-              preventContextMenu: true
-            },
-            {
-              time: 70,
-              label: "V7",
-              color: '#ff990a',
-              preventContextMenu: true
-            }
-          ],
-          [
-            {
-              time: 10,
-              label: "V1",
-              color: '#ff990a',
-              draggable: true
-            },
-            {
-              time: 20,
-              label: "V2",
-              color: '#ff990a',
-              preventContextMenu: true
-            },
-            {
-              time: 30,
-              label: "V3",
-              color: '#ff990a',
-              preventContextMenu: true
-            },
-            {
-              time: 40,
-              label: "V4",
-              color: '#ff990a',
-              preventContextMenu: true
-            },
-            {
-              time: 50,
-              label: "V5",
-              color: '#ff990a',
-              preventContextMenu: true
-            },
-            {
-              time: 60,
-              label: "V6",
-              color: '#ff990a',
-              preventContextMenu: true
-            },
-            {
-              time: 70,
-              label: "V7",
-              color: '#ff990a',
-              preventContextMenu: true
-            }
-          ],
-          [
-            {
-              time: 10,
-              label: "V1",
-              color: '#ff990a',
-              draggable: true
-            },
-            {
-              time: 20,
-              label: "V2",
-              color: '#ff990a',
-              preventContextMenu: true
-            },
-            {
-              time: 30,
-              label: "V3",
-              color: '#ff990a',
-              preventContextMenu: true
-            },
-            {
-              time: 40,
-              label: "V4",
-              color: '#ff990a',
-              preventContextMenu: true
-            },
-            {
-              time: 50,
-              label: "V5",
-              color: '#ff990a',
-              preventContextMenu: true
-            },
-            {
-              time: 60,
-              label: "V6",
-              color: '#ff990a',
-              preventContextMenu: true
-            },
-            {
-              time: 70,
-              label: "V7",
-              color: '#ff990a',
-              preventContextMenu: true
-            }
-          ],
-          [
-            {
-              time: 10,
-              label: "V1",
-              color: '#ff990a',
-              draggable: true
-            },
-            {
-              time: 20,
-              label: "V2",
-              color: '#ff990a',
-              preventContextMenu: true
-            },
-            {
-              time: 30,
-              label: "V3",
-              color: '#ff990a',
-              preventContextMenu: true
-            },
-            {
-              time: 40,
-              label: "V4",
-              color: '#ff990a',
-              preventContextMenu: true
-            },
-            {
-              time: 50,
-              label: "V5",
-              color: '#ff990a',
-              preventContextMenu: true
-            },
-            {
-              time: 60,
-              label: "V6",
-              color: '#ff990a',
-              preventContextMenu: true
-            },
-            {
-              time: 70,
-              label: "V7",
-              color: '#ff990a',
-              preventContextMenu: true
-            }
-          ],
-          [
-            {
-              time: 10,
-              label: "V1",
-              color: '#ff990a',
-              draggable: true
-            },
-            {
-              time: 20,
-              label: "V2",
-              color: '#ff990a',
-              preventContextMenu: true
-            },
-            {
-              time: 30,
-              label: "V3",
-              color: '#ff990a',
-              preventContextMenu: true
-            },
-            {
-              time: 40,
-              label: "V4",
-              color: '#ff990a',
-              preventContextMenu: true
-            },
-            {
-              time: 50,
-              label: "V5",
-              color: '#ff990a',
-              preventContextMenu: true
-            },
-            {
-              time: 60,
-              label: "V6",
-              color: '#ff990a',
-              preventContextMenu: true
-            },
-            {
-              time: 70,
-              label: "V7",
-              color: '#ff990a',
-              preventContextMenu: true
-            }
-          ],
-          [
-            {
-              time: 10,
-              label: "V1",
-              color: '#ff990a',
-              draggable: true
-            },
-            {
-              time: 20,
-              label: "V2",
-              color: '#ff990a',
-              preventContextMenu: true
-            },
-            {
-              time: 30,
-              label: "V3",
-              color: '#ff990a',
-              preventContextMenu: true
-            },
-            {
-              time: 40,
-              label: "V4",
-              color: '#ff990a',
-              preventContextMenu: true
-            },
-            {
-              time: 50,
-              label: "V5",
-              color: '#ff990a',
-              preventContextMenu: true
-            },
-            {
-              time: 60,
-              label: "V6",
-              color: '#ff990a',
-              preventContextMenu: true
-            },
-            {
-              time: 70,
-              label: "V7",
-              color: '#ff990a',
-              preventContextMenu: true
-            }
-          ],
-
-
+        
+        [
+          {
+            time: 10,
+            label: "V1",
+            color: '#ff990a',
+            draggable: true
+          },
+          {
+            time: 20,
+            label: "V2",
+            color: '#ff990a',
+            preventContextMenu: true
+          },
+          {
+            time: 30,
+            label: "V3",
+            color: '#ff990a',
+            preventContextMenu: true
+          },
+          {
+            time: 40,
+            label: "V4",
+            color: '#ff990a',
+            preventContextMenu: true
+          },
+          {
+            time: 50,
+            label: "V5",
+            color: '#ff990a',
+            preventContextMenu: true
+          },
+          {
+            time: 60,
+            label: "V6",
+            color: '#ff990a',
+            preventContextMenu: true
+          },
+          {
+            time: 70,
+            label: "V7",
+            color: '#ff990a',
+            preventContextMenu: true
+          }
+        ],
+        [
+          {
+            time: 10,
+            label: "V1",
+            color: '#ff990a',
+            draggable: true
+          },
+          {
+            time: 20,
+            label: "V2",
+            color: '#ff990a',
+            preventContextMenu: true
+          },
+          {
+            time: 30,
+            label: "V3",
+            color: '#ff990a',
+            preventContextMenu: true
+          },
+          {
+            time: 40,
+            label: "V4",
+            color: '#ff990a',
+            preventContextMenu: true
+          },
+          {
+            time: 50,
+            label: "V5",
+            color: '#ff990a',
+            preventContextMenu: true
+          },
+          {
+            time: 60,
+            label: "V6",
+            color: '#ff990a',
+            preventContextMenu: true
+          },
+          {
+            time: 70,
+            label: "V7",
+            color: '#ff990a',
+            preventContextMenu: true
+          }
+        ],
+        [
+          {
+            time: 10,
+            label: "V1",
+            color: '#ff990a',
+            draggable: true
+          },
+          {
+            time: 20,
+            label: "V2",
+            color: '#ff990a',
+            preventContextMenu: true
+          },
+          {
+            time: 30,
+            label: "V3",
+            color: '#ff990a',
+            preventContextMenu: true
+          },
+          {
+            time: 40,
+            label: "V4",
+            color: '#ff990a',
+            preventContextMenu: true
+          },
+          {
+            time: 50,
+            label: "V5",
+            color: '#ff990a',
+            preventContextMenu: true
+          },
+          {
+            time: 60,
+            label: "V6",
+            color: '#ff990a',
+            preventContextMenu: true
+          },
+          {
+            time: 70,
+            label: "V7",
+            color: '#ff990a',
+            preventContextMenu: true
+          }
+        ],
+        [
+          {
+            time: 10,
+            label: "V1",
+            color: '#ff990a',
+            draggable: true
+          },
+          {
+            time: 20,
+            label: "V2",
+            color: '#ff990a',
+            preventContextMenu: true
+          },
+          {
+            time: 30,
+            label: "V3",
+            color: '#ff990a',
+            preventContextMenu: true
+          },
+          {
+            time: 40,
+            label: "V4",
+            color: '#ff990a',
+            preventContextMenu: true
+          },
+          {
+            time: 50,
+            label: "V5",
+            color: '#ff990a',
+            preventContextMenu: true
+          },
+          {
+            time: 60,
+            label: "V6",
+            color: '#ff990a',
+            preventContextMenu: true
+          },
+          {
+            time: 70,
+            label: "V7",
+            color: '#ff990a',
+            preventContextMenu: true
+          }
+        ],
+        [
+          {
+            time: 10,
+            label: "V1",
+            color: '#ff990a',
+            draggable: true
+          },
+          {
+            time: 20,
+            label: "V2",
+            color: '#ff990a',
+            preventContextMenu: true
+          },
+          {
+            time: 30,
+            label: "V3",
+            color: '#ff990a',
+            preventContextMenu: true
+          },
+          {
+            time: 40,
+            label: "V4",
+            color: '#ff990a',
+            preventContextMenu: true
+          },
+          {
+            time: 50,
+            label: "V5",
+            color: '#ff990a',
+            preventContextMenu: true
+          },
+          {
+            time: 60,
+            label: "V6",
+            color: '#ff990a',
+            preventContextMenu: true
+          },
+          {
+            time: 70,
+            label: "V7",
+            color: '#ff990a',
+            preventContextMenu: true
+          }
+        ],
+        [
+          {
+            time: 10,
+            label: "V1",
+            color: '#ff990a',
+            draggable: true
+          },
+          {
+            time: 20,
+            label: "V2",
+            color: '#ff990a',
+            preventContextMenu: true
+          },
+          {
+            time: 30,
+            label: "V3",
+            color: '#ff990a',
+            preventContextMenu: true
+          },
+          {
+            time: 40,
+            label: "V4",
+            color: '#ff990a',
+            preventContextMenu: true
+          },
+          {
+            time: 50,
+            label: "V5",
+            color: '#ff990a',
+            preventContextMenu: true
+          },
+          {
+            time: 60,
+            label: "V6",
+            color: '#ff990a',
+            preventContextMenu: true
+          },
+          {
+            time: 70,
+            label: "V7",
+            color: '#ff990a',
+            preventContextMenu: true
+          }
+        ],
+        [
+          {
+            time: 10,
+            label: "V1",
+            color: '#ff990a',
+            draggable: true
+          },
+          {
+            time: 20,
+            label: "V2",
+            color: '#ff990a',
+            preventContextMenu: true
+          },
+          {
+            time: 30,
+            label: "V3",
+            color: '#ff990a',
+            preventContextMenu: true
+          },
+          {
+            time: 40,
+            label: "V4",
+            color: '#ff990a',
+            preventContextMenu: true
+          },
+          {
+            time: 50,
+            label: "V5",
+            color: '#ff990a',
+            preventContextMenu: true
+          },
+          {
+            time: 60,
+            label: "V6",
+            color: '#ff990a',
+            preventContextMenu: true
+          },
+          {
+            time: 70,
+            label: "V7",
+            color: '#ff990a',
+            preventContextMenu: true
+          }
+        ],
+       
+       
         ];
         var songs = [
-          "./audio/3.m4a",
-          "./audio/2.mp3"
+        "./audio/1.mp3",
+        "./audio/2.mp3"
         ];
-        this.markers = markerList[(Math.floor(Math.random())) + window.songChosen * 2];
+        this.markers = markerList[(Math.floor(Math.random()))  + window.songChosen * 2];
         this.wavesurfer = WaveSurfer.create({
           container: document.querySelector('#waveform'),
           waveColor: 'black',
@@ -692,18 +577,22 @@
             ) // 添加标记插件
           ]
         });
-
+        this.wavesurfer.on('finish', () => {
+          // 当音频文件加载完成后，执行一些操作
+          console.log('播放完毕');
+          this.videoNext = true
+         
+        });
+    
         // 加载音频文件
         this.wavesurfer.load(songs[window.songChosen]);
-
+        
         // 更新当前播放位置
         const updateCurrentTime = () => {
           const currentTime = this.wavesurfer.getCurrentTime();
           document.getElementById('currentTime').innerHTML = currentTime.toFixed(2) + 's';
-
           // 在波形图上显示当前播放位置的竖线
           this.wavesurfer.drawer.progress(this.wavesurfer.backend.getPlayedPercents());
-
           requestAnimationFrame(updateCurrentTime);
         };
         // 添加事件监听器
@@ -717,10 +606,11 @@
             this.wavesurfer.addMarker(marker);
           });
         });
-
+    
         // 控制播放/暂停
         document.getElementById('playButton').addEventListener('click', () => {
           this.wavesurfer.playPause();
+          document.getElementById('playButton').style.opacity = 0
         });
       },
       methods: {
@@ -735,7 +625,7 @@
           this.count++
 
           if (this.count === 3) {
-            console.log("324")
+            
             this.timer = setInterval(() => {
               this.seconds++;
               if (this.seconds === 60) {
@@ -746,52 +636,78 @@
                 this.minutes = 0;
                 this.hours++;
               }
-
+              
+            }, 1000);
+          }
+        },
+        clickfns(){
+          this.count++
+          axios.post('http://8.130.19.133:3000/save-array', this.list)
+  .then(response => {
+    console.log(response.data);  // 处理响应数据
+  })
+  .catch(error => {
+    console.error(error);  // 处理错误
+  });
+          if (this.count === 3) {
+            
+            this.timer = setInterval(() => {
+              this.seconds++;
+              if (this.seconds === 60) {
+                this.seconds = 0;
+                this.minutes++;
+              }
+              if (this.minutes === 60) {
+                this.minutes = 0;
+                this.hours++;
+              }
+              
             }, 1000);
           }
         },
         startTimer() {
-
-          // 输出时间
-          console.log(`第${this.index}次${this.hours}时:${this.minutes}分:秒${this.seconds}`);
-
-          let temp = (`第${this.index}次${this.hours}时:${this.minutes}分:秒${this.seconds}`)
-
-          this.index++
-          this.list.push(temp)
-          console.log(this.list)
-
+          console.log( this.wavesurfer.getCurrentTime().toFixed(2) + 's')
+            // 输出时间
+            // console.log(`第${this.index}次${this.hours}时:${this.minutes}分:秒${this.seconds}`);
+            
+            // let temp = (`第${this.index}次${this.hours}时:${this.minutes}分:秒${this.seconds}`)
+            let temp = ('第' + this.index + '次'+ this.wavesurfer.getCurrentTime().toFixed(2) + 's')
+            this.index++
+            this.list.push(temp)
+            console.log(this.list)
+       
         },
         stopTimer() {
           clearInterval(this.timer);
         },
-
-        handleTimeUpdate() {
-          const currentTime = audioPlayer.currentTime;
-
-          this.arrowTimes.forEach((time) => {
-            if (currentTime >= time) {
-              this.arrowTime = time;
-              this.drawArrow();
-            }
-          });
-        },
+        
+      handleTimeUpdate() {
+        const currentTime = audioPlayer.currentTime;
+    
+        this.arrowTimes.forEach((time) => {
+          if (currentTime >= time) {
+            this.arrowTime = time;
+            this.drawArrow();
+          }
+        });
+      },
       }
     });
   </script>
   <script>
     var audioPlayer = document.getElementById('audioPlayer');
     var progressBar = document.getElementById('progress');
-
+    
     var songs = [
-      "./audio/3.m4a",
-      "./audio/2.mp3"
+    "./audio/1.mp3",
+    "./audio/2.mp3"
     ];
     var clickCount = 0;
     var counterElement = document.getElementById('counter');
     window.songChosen = 0;
     window.markers = [];
     function toggleSong() {
+     document.getElementById('randomPlay').style.display = 'none'
       if (!audioPlayer.paused) {
         audioPlayer.pause();
         audioPlayer.currentTime = 0;
@@ -804,13 +720,21 @@
         audioPlayer.play();
         updateProgressBar();
       }
+      console.log(123)
+      this.tog = false
+      console.log(this.tog)
     }
 
     function updateProgressBar() {
-      var duration = audioPlayer.duration;
-      var currentTime = audioPlayer.currentTime;
-      var progress = (currentTime / duration) * 100;
-      progressBar.style.width = progress + '%';
+      
+      var duration = audioPlayer.duration
+      var currentTime = audioPlayer.currentTime
+      var progress = (currentTime / duration) * 100
+      progressBar.style.width = progress + '%'
+      if(progressBar.style.width == '100%'){
+        this.randomA = true
+      }
+      
     }
 
     function resetProgressBar() {
@@ -821,16 +745,16 @@
 
     Vue.component('my-component', {
       props: ['songChosen'],
-
+    
       created() {
         console.log(this.songChosen);
       }
     });
     let count = 0;
-
+    
 
   </script>
-
+  
 </body>
 
 </html>
