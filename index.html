@@ -671,7 +671,7 @@
             // console.log(`第${this.index}次${this.hours}时:${this.minutes}分:秒${this.seconds}`);
             
             // let temp = (`第${this.index}次${this.hours}时:${this.minutes}分:秒${this.seconds}`)
-            let temp = ('click time ' + this.index + this.wavesurfer.getCurrentTime().toFixed(2) + 's')
+            let temp = ('click time' + this.index + ' ' + this.wavesurfer.getCurrentTime().toFixed(2) + 's')
             this.index++
             this.list.push(temp)
             console.log(this.list)
