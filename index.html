@@ -112,7 +112,7 @@
         <button v-if="tog" onclick="toggleSong()" style="width: 150px;height: 50px;font-size: 16px;margin-bottom: 10px;" id="randomPlay">Play
           Random Song</button>
         <button style="width: 150px;height: 50px;font-size: 16px;position: absolute;bottom: 10px;right: 10px;"
-          v-show="randomA" @click="clickfn()">next</button>
+          v-show="randomA" @click="clickfn()" id="randomA">next</button>
       </div>
       </div>
 
@@ -732,7 +732,7 @@
       var progress = (currentTime / duration) * 100
       progressBar.style.width = progress + '%'
       if(progressBar.style.width == '100%'){
-        this.randomA = true
+         document.getElementById('randomA').style.display = 'block'
       }
       
     }
